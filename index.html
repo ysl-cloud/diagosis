@@ -1,0 +1,752 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="color-scheme" content="light dark">
+<meta name="description" content="AI로 조사한 직무 정보를 입력하면 실시간으로 완성되는 나만의 직무분석 카드 도구 — 진로설계 집중프로그램">
+<title>직무분석설계도</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Gowun+Batang:wght@400;700&family=IBM+Plex+Sans+KR:wght@400;500;600;700&family=IBM+Plex+Mono:wght@500;600&display=swap">
+<style>
+  :root{
+    --ink:#1F2A4D;
+    --ink-soft:#4A5578;
+    --accent:#4456B8;
+    --accent-2:#5B6FD6;
+    --accent-soft:#EEF0FB;
+    --gold:#B8860A;
+    --gold-soft:#FBF1D6;
+    --rose:#B5473F;
+    --rose-soft:#FBEEEC;
+    --paper:#F7F7FB;
+    --surface:#FFFFFF;
+    --line:#DFE2ED;
+    --line-soft:#EBEDF5;
+    --shadow: 0 1px 2px rgba(31,42,77,0.04), 0 8px 24px -12px rgba(31,42,77,0.18);
+    --radius: 14px;
+    --font-display:'Gowun Batang', 'Nanum Myeongjo', serif;
+    --font-body:'IBM Plex Sans KR', 'Noto Sans KR', -apple-system, sans-serif;
+    --font-mono:'IBM Plex Mono', 'IBM Plex Sans KR', monospace;
+  }
+  @media (prefers-color-scheme: dark){
+    :root:not([data-theme="light"]){
+      --ink:#E9EBF6;
+      --ink-soft:#B7BEDA;
+      --accent:#8393EE;
+      --accent-2:#6E80E0;
+      --accent-soft:#232A52;
+      --gold:#E8C158;
+      --gold-soft:#3A331B;
+      --rose:#E68A83;
+      --rose-soft:#3A2422;
+      --paper:#12152A;
+      --surface:#1A1E3A;
+      --line:#323A63;
+      --line-soft:#262C4E;
+      --shadow: 0 1px 2px rgba(0,0,0,0.3), 0 12px 28px -14px rgba(0,0,0,0.55);
+    }
+  }
+  :root[data-theme="dark"]{
+    --ink:#E9EBF6;
+    --ink-soft:#B7BEDA;
+    --accent:#8393EE;
+    --accent-2:#6E80E0;
+    --accent-soft:#232A52;
+    --gold:#E8C158;
+    --gold-soft:#3A331B;
+    --rose:#E68A83;
+    --rose-soft:#3A2422;
+    --paper:#12152A;
+    --surface:#1A1E3A;
+    --line:#323A63;
+    --line-soft:#262C4E;
+    --shadow: 0 1px 2px rgba(0,0,0,0.3), 0 12px 28px -14px rgba(0,0,0,0.55);
+  }
+
+  *{box-sizing:border-box;}
+  html,body{margin:0;padding:0;}
+  body{
+    background:var(--paper);
+    color:var(--ink);
+    font-family:var(--font-body);
+    line-height:1.6;
+    -webkit-font-smoothing:antialiased;
+  }
+  ::selection{ background:var(--accent-soft); color:var(--accent); }
+
+  .app{
+    max-width:1320px;
+    margin:0 auto;
+    padding:28px 20px 80px;
+  }
+
+  /* ---------- header ---------- */
+  .app-header{
+    display:flex;
+    align-items:flex-end;
+    justify-content:space-between;
+    gap:24px;
+    flex-wrap:wrap;
+    padding-bottom:20px;
+    margin-bottom:24px;
+    border-bottom:1px solid var(--line);
+  }
+  .eyebrow{
+    font-family:var(--font-mono);
+    font-size:12px;
+    letter-spacing:0.08em;
+    text-transform:uppercase;
+    color:var(--accent);
+    margin:0 0 10px;
+  }
+  .app-title{
+    font-family:var(--font-display);
+    font-weight:700;
+    font-size:clamp(28px,4vw,40px);
+    margin:0;
+    text-wrap:balance;
+    color:var(--ink);
+  }
+  .app-sub{
+    margin:8px 0 0;
+    color:var(--ink-soft);
+    font-size:14.5px;
+    max-width:52ch;
+  }
+  .header-actions{
+    display:flex;
+    gap:10px;
+    flex-wrap:wrap;
+  }
+  button{ font-family:var(--font-body); }
+  .btn{
+    appearance:none;
+    border:1px solid var(--line);
+    background:var(--surface);
+    color:var(--ink);
+    font-size:13.5px;
+    font-weight:600;
+    padding:10px 16px;
+    border-radius:999px;
+    cursor:pointer;
+    display:inline-flex;
+    align-items:center;
+    gap:6px;
+    transition:transform .12s ease, border-color .12s ease, background .12s ease;
+  }
+  .btn:hover{ border-color:var(--accent-2); transform:translateY(-1px); }
+  .btn:focus-visible{ outline:2px solid var(--accent); outline-offset:2px; }
+  .btn.primary{
+    background:var(--accent);
+    border-color:var(--accent);
+    color:#fff;
+  }
+  .btn.primary:hover{ background:var(--accent-2); border-color:var(--accent-2); }
+  .btn.ghost{ background:transparent; }
+
+  /* ---------- progress ---------- */
+  .progress-wrap{
+    display:flex; align-items:center; gap:14px;
+    margin-bottom:26px;
+  }
+  .progress-track{
+    flex:1; height:8px; border-radius:999px;
+    background:var(--line-soft);
+    overflow:hidden;
+  }
+  .progress-fill{
+    height:100%; border-radius:999px;
+    background:linear-gradient(90deg,var(--accent),var(--accent-2));
+    width:0%;
+    transition:width .35s ease;
+  }
+  .progress-label{
+    font-family:var(--font-mono);
+    font-size:12.5px;
+    color:var(--ink-soft);
+    white-space:nowrap;
+    font-variant-numeric:tabular-nums;
+  }
+
+  /* ---------- layout ---------- */
+  .workbench{
+    display:grid;
+    grid-template-columns:minmax(0,1fr) minmax(0,1fr);
+    gap:24px;
+    align-items:start;
+  }
+  @media (max-width:920px){
+    .workbench{ grid-template-columns:1fr; }
+  }
+
+  .mobile-tabs{ display:none; gap:8px; margin-bottom:16px; }
+  @media (max-width:920px){
+    .mobile-tabs{ display:flex; }
+    .pane{ display:none; }
+    .pane.active{ display:block; }
+  }
+  .mobile-tabs button{ flex:1; }
+
+  /* ---------- form pane ---------- */
+  .pane-form{
+    display:flex; flex-direction:column; gap:16px;
+  }
+  .card{
+    background:var(--surface);
+    border:1px solid var(--line);
+    border-radius:var(--radius);
+    padding:20px 22px;
+    box-shadow:var(--shadow);
+  }
+  .card-head{
+    display:flex; align-items:baseline; gap:10px; margin-bottom:14px;
+  }
+  .card-num{
+    font-family:var(--font-mono);
+    font-size:12px; font-weight:600;
+    color:#fff; background:var(--accent);
+    width:22px;height:22px;border-radius:6px;
+    display:inline-flex;align-items:center;justify-content:center;
+    flex:none;
+  }
+  .card-title{ font-size:15.5px; font-weight:700; margin:0; }
+  .card-hint{ font-size:12.5px; color:var(--ink-soft); margin:2px 0 0; }
+
+  label{
+    display:block;
+    font-size:12.5px;
+    font-weight:600;
+    color:var(--ink-soft);
+    margin:14px 0 6px;
+  }
+  label:first-of-type{ margin-top:0; }
+  input[type=text], textarea, select{
+    width:100%;
+    font-family:var(--font-body);
+    font-size:14px;
+    color:var(--ink);
+    background:var(--paper);
+    border:1px solid var(--line);
+    border-radius:9px;
+    padding:9px 12px;
+    resize:vertical;
+  }
+  input[type=text]:focus, textarea:focus, select:focus{
+    outline:2px solid var(--accent-2);
+    outline-offset:0;
+    border-color:transparent;
+  }
+  textarea{ min-height:64px; line-height:1.55; }
+  .row2{ display:grid; grid-template-columns:1fr 1fr; gap:12px; }
+  .row3{ display:grid; grid-template-columns:1fr 1fr 1fr; gap:12px; }
+  @media (max-width:520px){ .row2,.row3{ grid-template-columns:1fr; } }
+
+  .task-row{ display:grid; grid-template-columns:26px 1fr; gap:8px; align-items:center; margin-bottom:8px; }
+  .task-row .idx{ font-family:var(--font-mono); font-size:12px; color:var(--ink-soft); text-align:center; }
+
+  .skill-row{ display:grid; grid-template-columns:28px 1fr 1fr; gap:8px; margin-bottom:8px; align-items:center; }
+  .medal{ font-size:16px; text-align:center; }
+
+  .chip-select{ display:flex; gap:8px; flex-wrap:wrap; }
+  .chip{
+    border:1.5px solid var(--line);
+    background:var(--paper);
+    color:var(--ink-soft);
+    font-size:13px; font-weight:600;
+    padding:8px 14px; border-radius:999px;
+    cursor:pointer;
+  }
+  .chip[data-active="true"]{ color:#fff; border-color:transparent; }
+  .chip[data-type="D"][data-active="true"]{ background:#B5473F; }
+  .chip[data-type="I"][data-active="true"]{ background:#D9A818; color:#3a2a00; }
+  .chip[data-type="S"][data-active="true"]{ background:#3E8A63; }
+  .chip[data-type="C"][data-active="true"]{ background:#4456B8; }
+
+  /* ---------- result pane (the 설계도) ---------- */
+  .pane-result{ position:sticky; top:20px; }
+  @media (max-width:920px){ .pane-result{ position:static; } }
+
+  .blueprint{
+    background:var(--surface);
+    border:1px solid var(--line);
+    border-radius:20px;
+    box-shadow:var(--shadow);
+    overflow:hidden;
+  }
+  .bp-head{
+    background:
+      radial-gradient(140% 160% at 100% 0%, var(--accent-soft), transparent 55%),
+      var(--surface);
+    padding:26px 26px 20px;
+    border-bottom:1px solid var(--line);
+  }
+  .bp-eyebrow{
+    font-family:var(--font-mono);
+    font-size:11px; letter-spacing:.08em; text-transform:uppercase;
+    color:var(--accent); margin:0 0 8px;
+  }
+  .bp-jobname{
+    font-family:var(--font-display);
+    font-size:clamp(22px,3vw,30px);
+    font-weight:700; margin:0; text-wrap:balance;
+    color:var(--ink);
+  }
+  .bp-tags{ display:flex; gap:8px; flex-wrap:wrap; margin-top:12px; }
+  .tag{
+    font-size:12px; font-weight:600; padding:5px 11px; border-radius:999px;
+    background:var(--accent-soft); color:var(--accent);
+    border:1px solid transparent;
+  }
+  .tag.disc{ background:transparent; border:1.5px solid var(--line); color:var(--ink-soft); }
+  .tag.disc[data-type="D"]{ border-color:#B5473F; color:#B5473F; }
+  .tag.disc[data-type="I"]{ border-color:#D9A818; color:#9c7a06; }
+  .tag.disc[data-type="S"]{ border-color:#3E8A63; color:#3E8A63; }
+  .tag.disc[data-type="C"]{ border-color:#4456B8; color:#4456B8; }
+
+  .bp-body{ padding:22px 26px 28px; display:flex; flex-direction:column; gap:22px; }
+  .bp-section-title{
+    font-size:11.5px; font-weight:700; letter-spacing:.06em; text-transform:uppercase;
+    color:var(--ink-soft); margin:0 0 10px; display:flex; align-items:center; gap:8px;
+  }
+  .bp-section-title::after{ content:""; flex:1; height:1px; background:var(--line-soft); }
+
+  .bp-definition{
+    font-family:var(--font-display);
+    font-size:16px; line-height:1.75; color:var(--ink);
+    padding:14px 16px; border-left:3px solid var(--accent);
+    background:var(--accent-soft); border-radius:0 10px 10px 0;
+  }
+  .bp-definition.empty, .bp-empty{ color:var(--ink-soft); font-style:normal; font-family:var(--font-body); font-size:13.5px; }
+
+  .bp-tasks{ list-style:none; margin:0; padding:0; display:flex; flex-direction:column; gap:8px; }
+  .bp-tasks li{ display:flex; gap:10px; font-size:13.5px; align-items:flex-start; }
+  .bp-tasks .n{
+    font-family:var(--font-mono); font-size:11px; font-weight:600;
+    color:var(--accent); background:var(--accent-soft);
+    width:20px;height:20px;border-radius:6px;flex:none;
+    display:inline-flex;align-items:center;justify-content:center; margin-top:1px;
+  }
+
+  .bp-split{ display:grid; grid-template-columns:1fr 1fr; gap:14px; }
+  @media (max-width:560px){ .bp-split{ grid-template-columns:1fr; } }
+  .bp-box{ border-radius:10px; padding:12px 14px; font-size:13px; }
+  .bp-box.good{ background:var(--accent-soft); }
+  .bp-box.tough{ background:var(--rose-soft); }
+  .bp-box-title{ font-weight:700; font-size:12.5px; margin-bottom:4px; }
+  .bp-box.good .bp-box-title{ color:var(--accent); }
+  .bp-box.tough .bp-box-title{ color:var(--rose); }
+
+  .bp-competency{ display:flex; flex-direction:column; gap:8px; }
+  .comp-row{ display:flex; gap:10px; font-size:13px; }
+  .comp-label{ flex:none; width:52px; font-weight:700; font-size:12px; color:var(--ink-soft); padding-top:1px; }
+
+  .bp-skills{ display:flex; flex-direction:column; gap:6px; }
+  .skill-item{ display:flex; align-items:baseline; gap:8px; font-size:13.5px; }
+  .skill-item .medal{ flex:none; }
+  .skill-item .why{ color:var(--ink-soft); font-size:12px; }
+
+  .bp-fit{ font-size:13.5px; }
+  .bp-fit-row{ margin-bottom:8px; }
+  .bp-fit-row b{ font-size:12px; color:var(--ink-soft); font-weight:700; display:block; margin-bottom:2px; }
+
+  .bp-closing{
+    font-family:var(--font-display);
+    font-size:14.5px; line-height:1.75;
+    color:var(--ink); padding-top:6px; border-top:1px dashed var(--line);
+  }
+
+  .bp-footer{
+    padding:14px 26px; background:var(--paper);
+    display:flex; justify-content:space-between; align-items:center;
+    font-family:var(--font-mono); font-size:11px; color:var(--ink-soft);
+    border-top:1px solid var(--line);
+  }
+
+  @media print{
+    .pane-form, .app-header .header-actions, .mobile-tabs, .progress-wrap{ display:none !important; }
+    body{ background:#fff; }
+    .workbench{ display:block; }
+    .pane-result{ position:static; }
+    .blueprint{ box-shadow:none; border:none; }
+  }
+
+  .visually-hidden{ position:absolute; width:1px;height:1px; overflow:hidden; clip:rect(0 0 0 0); }
+</style>
+</head>
+<body>
+
+<div class="app">
+  <header class="app-header">
+    <div>
+      <p class="eyebrow">2026 진로설계 집중프로그램 · AI 활용 맞춤형 직무탐색</p>
+      <h1 class="app-title">직무분석설계도</h1>
+      <p class="app-sub">왼쪽에 AI로 조사한 직무 정보를 입력하면, 오른쪽에 나만의 직무분석 카드가 실시간으로 완성됩니다.</p>
+    </div>
+    <div class="header-actions">
+      <button class="btn ghost" id="resetBtn" type="button">초기화</button>
+      <button class="btn primary" id="printBtn" type="button">결과 인쇄·PDF 저장</button>
+    </div>
+  </header>
+
+  <div class="progress-wrap">
+    <div class="progress-track"><div class="progress-fill" id="progressFill"></div></div>
+    <span class="progress-label" id="progressLabel">0% 작성됨</span>
+  </div>
+
+  <div class="mobile-tabs">
+    <button class="btn primary" id="tabFormBtn" type="button">✏️ 입력</button>
+    <button class="btn ghost" id="tabResultBtn" type="button">📋 설계도 보기</button>
+  </div>
+
+  <div class="workbench">
+    <!-- ============ FORM ============ -->
+    <section class="pane pane-form active" id="paneForm">
+
+      <div class="card">
+        <div class="card-head"><span class="card-num">1</span><div><p class="card-title">직무 기본정보</p><p class="card-hint">분석할 직무를 특정합니다</p></div></div>
+        <label for="f-family">직군 (Job Family)</label>
+        <select id="f-family">
+          <option value="">선택 안 함</option>
+          <option>경영지원</option>
+          <option>영업/마케팅</option>
+          <option>생산제조</option>
+          <option>연구개발</option>
+          <option>IT</option>
+          <option>물류</option>
+        </select>
+        <div class="row2">
+          <div>
+            <label for="f-job">직무명</label>
+            <input type="text" id="f-job" placeholder="예: 콘텐츠 마케터">
+          </div>
+          <div>
+            <label for="f-industry">관련 산업 / 참고 기업</label>
+            <input type="text" id="f-industry" placeholder="예: 식품 · FMCG">
+          </div>
+        </div>
+      </div>
+
+      <div class="card">
+        <div class="card-head"><span class="card-num">2</span><div><p class="card-title">직무 정의</p><p class="card-hint">이 직무는 한 마디로 무엇을 하는 일인가요?</p></div></div>
+        <textarea id="f-def" placeholder="예: 소비자와 브랜드를 연결하는 콘텐츠를 기획·제작·배포하며 브랜드 인지도와 고객 참여를 높이는 업무"></textarea>
+      </div>
+
+      <div class="card">
+        <div class="card-head"><span class="card-num">3</span><div><p class="card-title">주요 업무 5가지</p><p class="card-hint">AI 프롬프트: 이 직무의 주요 업무 5가지를 알려줘</p></div></div>
+        <div id="taskRows"></div>
+      </div>
+
+      <div class="card">
+        <div class="card-head"><span class="card-num">4</span><div><p class="card-title">매력적인 점 · 어려운 점</p><p class="card-hint">이 직무의 현실적인 양면</p></div></div>
+        <label for="f-good">😊 매력적인 점</label>
+        <textarea id="f-good" placeholder="예: 내 아이디어가 실제 캠페인으로 세상에 나가는 것을 볼 수 있음"></textarea>
+        <label for="f-tough">😓 어려운 점</label>
+        <textarea id="f-tough" placeholder="예: 트렌드 변화가 빨라 끊임없이 새로운 채널·포맷을 학습해야 함"></textarea>
+      </div>
+
+      <div class="card">
+        <div class="card-head"><span class="card-num">5</span><div><p class="card-title">신입에게 요구되는 역량</p><p class="card-hint">지식 · 기술 · 태도로 나누어 정리</p></div></div>
+        <label for="f-know">지식 (Knowledge)</label>
+        <textarea id="f-know" placeholder="예: 마케팅 기초 이론, 소비자 행동 이해"></textarea>
+        <label for="f-skill">기술 (Skill)</label>
+        <textarea id="f-skill" placeholder="예: SNS 콘텐츠 제작, 데이터 분석 툴 활용"></textarea>
+        <label for="f-attitude">태도 (Attitude)</label>
+        <textarea id="f-attitude" placeholder="예: 트렌드에 대한 호기심, 빠른 실행력"></textarea>
+      </div>
+
+      <div class="card">
+        <div class="card-head"><span class="card-num">6</span><div><p class="card-title">2025~2026 직무 트렌드</p><p class="card-hint">AI 프롬프트: 이 직무의 최신 트렌드와 필요 스킬을 알려줘</p></div></div>
+        <label>지금 가장 중요해진 스킬 Top 3</label>
+        <div id="skillRows"></div>
+        <label for="f-aichange">AI 도구 도입으로 변화하고 있는 업무</label>
+        <textarea id="f-aichange" placeholder="예: 초안 작성은 AI가 보조, 사람은 기획·톤앤매너 조정에 집중"></textarea>
+      </div>
+
+      <div class="card">
+        <div class="card-head"><span class="card-num">7</span><div><p class="card-title">나의 적합도 분석</p><p class="card-hint">eDISC 결과와 이 직무를 연결해봅니다</p></div></div>
+        <label>나의 eDISC 유형</label>
+        <div class="chip-select" id="discChips">
+          <button class="chip" data-type="D" type="button">D 주도형</button>
+          <button class="chip" data-type="I" type="button">I 사교형</button>
+          <button class="chip" data-type="S" type="button">S 안정형</button>
+          <button class="chip" data-type="C" type="button">C 신중형</button>
+        </div>
+        <label for="f-fitgood">나와 맞는 point</label>
+        <textarea id="f-fitgood" placeholder="예: 새로운 아이디어를 즐기고 사람들 앞에서 표현하는 것이 편함"></textarea>
+        <label for="f-fitgap">보완이 필요한 point</label>
+        <textarea id="f-fitgap" placeholder="예: 데이터를 꼼꼼히 분석하는 습관을 더 길러야 함"></textarea>
+      </div>
+
+      <div class="card">
+        <div class="card-head"><span class="card-num">8</span><div><p class="card-title">종합의견</p><p class="card-hint">이 직무, 나에게 얼마나 잘 맞을까?</p></div></div>
+        <textarea id="f-conclusion" placeholder="예: 사람과 트렌드를 좋아하는 나의 성향과 잘 맞는 직무. 다음 학기엔 SNS 운영 대외활동에 지원해볼 것"></textarea>
+      </div>
+
+    </section>
+
+    <!-- ============ RESULT / 설계도 ============ -->
+    <section class="pane pane-result" id="paneResult">
+      <div class="blueprint" id="blueprint">
+        <div class="bp-head">
+          <p class="bp-eyebrow">Job Analysis Blueprint</p>
+          <h2 class="bp-jobname" id="bp-jobname">직무명을 입력해보세요</h2>
+          <div class="bp-tags" id="bp-tags"></div>
+        </div>
+        <div class="bp-body">
+
+          <div>
+            <p class="bp-section-title">직무 정의</p>
+            <p class="bp-definition empty" id="bp-def">아직 입력된 내용이 없습니다.</p>
+          </div>
+
+          <div>
+            <p class="bp-section-title">주요 업무</p>
+            <ol class="bp-tasks" id="bp-tasks"><li class="bp-empty">주요 업무를 입력하면 이곳에 정리됩니다.</li></ol>
+          </div>
+
+          <div>
+            <p class="bp-section-title">매력 · 어려움</p>
+            <div class="bp-split">
+              <div class="bp-box good"><div class="bp-box-title">😊 매력적인 점</div><div id="bp-good" class="bp-empty">-</div></div>
+              <div class="bp-box tough"><div class="bp-box-title">😓 어려운 점</div><div id="bp-tough" class="bp-empty">-</div></div>
+            </div>
+          </div>
+
+          <div>
+            <p class="bp-section-title">요구 역량</p>
+            <div class="bp-competency">
+              <div class="comp-row"><span class="comp-label">지식</span><span id="bp-know" class="bp-empty">-</span></div>
+              <div class="comp-row"><span class="comp-label">기술</span><span id="bp-skill" class="bp-empty">-</span></div>
+              <div class="comp-row"><span class="comp-label">태도</span><span id="bp-attitude" class="bp-empty">-</span></div>
+            </div>
+          </div>
+
+          <div>
+            <p class="bp-section-title">2025~2026 필수 스킬 Top 3</p>
+            <div class="bp-skills" id="bp-skills"><span class="bp-empty">스킬을 입력해보세요.</span></div>
+          </div>
+
+          <div>
+            <p class="bp-section-title">나의 적합도</p>
+            <div class="bp-fit">
+              <div class="bp-fit-row"><b>나와 맞는 point</b><span id="bp-fitgood" class="bp-empty">-</span></div>
+              <div class="bp-fit-row"><b>보완이 필요한 point</b><span id="bp-fitgap" class="bp-empty">-</span></div>
+            </div>
+          </div>
+
+          <p class="bp-closing" id="bp-conclusion">종합의견을 입력하면 여기에 마무리 문장으로 표시됩니다.</p>
+        </div>
+        <div class="bp-footer">
+          <span>진로설계 집중프로그램</span>
+          <span id="bp-date"></span>
+        </div>
+      </div>
+    </section>
+  </div>
+</div>
+
+<script>
+(function(){
+  "use strict";
+  var STORAGE_KEY = "job-blueprint-v1";
+
+  var taskCount = 5, skillCount = 3;
+  var taskRowsEl = document.getElementById("taskRows");
+  var skillRowsEl = document.getElementById("skillRows");
+
+  for (var i=1;i<=taskCount;i++){
+    var row = document.createElement("div");
+    row.className = "task-row";
+    row.innerHTML = '<span class="idx">'+i+'</span><input type="text" class="f-task" data-idx="'+i+'" placeholder="업무 '+i+' 을(를) 입력하세요">';
+    taskRowsEl.appendChild(row);
+  }
+  var medals = ["🥇","🥈","🥉"];
+  for (var j=0;j<skillCount;j++){
+    var srow = document.createElement("div");
+    srow.className = "skill-row";
+    srow.innerHTML = '<span class="medal">'+medals[j]+'</span>'+
+      '<input type="text" class="f-skillname" data-idx="'+j+'" placeholder="스킬명">'+
+      '<input type="text" class="f-skillwhy" data-idx="'+j+'" placeholder="중요해진 이유">';
+    skillRowsEl.appendChild(srow);
+  }
+
+  var discChips = document.querySelectorAll("#discChips .chip");
+  var discActive = "";
+  discChips.forEach(function(chip){
+    chip.addEventListener("click", function(){
+      var t = chip.getAttribute("data-type");
+      discActive = (discActive === t) ? "" : t;
+      discChips.forEach(function(c){ c.setAttribute("data-active", c.getAttribute("data-type") === discActive ? "true" : "false"); });
+      render(); save();
+    });
+  });
+
+  var discNames = { D:"D 주도형", I:"I 사교형", S:"S 안정형", C:"C 신중형" };
+
+  function $(id){ return document.getElementById(id); }
+  function val(id){ return $(id).value.trim(); }
+
+  function collect(){
+    var tasks = Array.prototype.map.call(document.querySelectorAll(".f-task"), function(el){ return el.value.trim(); }).filter(Boolean);
+    var skills = [];
+    document.querySelectorAll(".f-skillname").forEach(function(el, idx){
+      var name = el.value.trim();
+      var why = document.querySelectorAll(".f-skillwhy")[idx].value.trim();
+      if (name) skills.push({ name: name, why: why });
+    });
+    return {
+      family: val("f-family"), job: val("f-job"), industry: val("f-industry"),
+      def: val("f-def"), tasks: tasks,
+      good: val("f-good"), tough: val("f-tough"),
+      know: val("f-know"), skill: val("f-skill"), attitude: val("f-attitude"),
+      skills: skills, aichange: val("f-aichange"),
+      disc: discActive, fitgood: val("f-fitgood"), fitgap: val("f-fitgap"),
+      conclusion: val("f-conclusion"),
+    };
+  }
+
+  function setText(id, text, emptyText){
+    var el = $(id);
+    if (text){ el.textContent = text; el.classList.remove("empty","bp-empty"); }
+    else { el.textContent = emptyText; el.classList.add("bp-empty"); }
+  }
+
+  function render(){
+    var d = collect();
+
+    $("bp-jobname").textContent = d.job || "직무명을 입력해보세요";
+
+    var tags = [];
+    if (d.family) tags.push('<span class="tag">'+escapeHtml(d.family)+'</span>');
+    if (d.industry) tags.push('<span class="tag">'+escapeHtml(d.industry)+'</span>');
+    if (d.disc) tags.push('<span class="tag disc" data-type="'+d.disc+'">'+discNames[d.disc]+'</span>');
+    $("bp-tags").innerHTML = tags.join("");
+
+    if (d.def){ $("bp-def").textContent = d.def; $("bp-def").classList.remove("empty"); }
+    else { $("bp-def").textContent = "아직 입력된 내용이 없습니다."; $("bp-def").classList.add("empty"); }
+
+    var tasksEl = $("bp-tasks");
+    if (d.tasks.length){
+      tasksEl.innerHTML = d.tasks.map(function(t,i){ return '<li><span class="n">'+(i+1)+'</span><span>'+escapeHtml(t)+'</span></li>'; }).join("");
+    } else {
+      tasksEl.innerHTML = '<li class="bp-empty">주요 업무를 입력하면 이곳에 정리됩니다.</li>';
+    }
+
+    setText("bp-good", d.good, "-");
+    setText("bp-tough", d.tough, "-");
+    setText("bp-know", d.know, "-");
+    setText("bp-skill", d.skill, "-");
+    setText("bp-attitude", d.attitude, "-");
+
+    var skillsEl = $("bp-skills");
+    if (d.skills.length){
+      skillsEl.innerHTML = d.skills.map(function(s,i){
+        return '<div class="skill-item"><span class="medal">'+medals[i]+'</span><span><strong>'+escapeHtml(s.name)+'</strong>'+(s.why ? '<span class="why"> — '+escapeHtml(s.why)+'</span>' : '')+'</span></div>';
+      }).join("");
+    } else {
+      skillsEl.innerHTML = '<span class="bp-empty">스킬을 입력해보세요.</span>';
+    }
+
+    setText("bp-fitgood", d.fitgood, "-");
+    setText("bp-fitgap", d.fitgap, "-");
+
+    if (d.conclusion){ $("bp-conclusion").textContent = "“" + d.conclusion + "”"; }
+    else { $("bp-conclusion").textContent = "종합의견을 입력하면 여기에 마무리 문장으로 표시됩니다."; }
+
+    // progress
+    var fields = [d.family, d.job, d.industry, d.def, d.good, d.tough, d.know, d.skill, d.attitude, d.aichange, d.disc, d.fitgood, d.fitgap, d.conclusion];
+    var filled = fields.filter(Boolean).length;
+    filled += Math.min(d.tasks.length, 5);
+    filled += Math.min(d.skills.length, 3);
+    var total = fields.length + 5 + 3;
+    var pct = Math.round((filled/total)*100);
+    $("progressFill").style.width = pct + "%";
+    $("progressLabel").textContent = pct + "% 작성됨";
+  }
+
+  function escapeHtml(s){
+    return s.replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;");
+  }
+
+  function save(){
+    try{
+      localStorage.setItem(STORAGE_KEY, JSON.stringify(collect()));
+    }catch(e){ /* storage unavailable — ignore, in-memory state still works */ }
+  }
+
+  function load(){
+    var data = null;
+    try{
+      var raw = localStorage.getItem(STORAGE_KEY);
+      if (raw) data = JSON.parse(raw);
+    }catch(e){ data = null; }
+    if (!data) return;
+    if (data.family) $("f-family").value = data.family;
+    if (data.job) $("f-job").value = data.job;
+    if (data.industry) $("f-industry").value = data.industry;
+    if (data.def) $("f-def").value = data.def;
+    if (data.good) $("f-good").value = data.good;
+    if (data.tough) $("f-tough").value = data.tough;
+    if (data.know) $("f-know").value = data.know;
+    if (data.skill) $("f-skill").value = data.skill;
+    if (data.attitude) $("f-attitude").value = data.attitude;
+    if (data.aichange) $("f-aichange").value = data.aichange;
+    if (data.fitgood) $("f-fitgood").value = data.fitgood;
+    if (data.fitgap) $("f-fitgap").value = data.fitgap;
+    if (data.conclusion) $("f-conclusion").value = data.conclusion;
+    if (data.tasks && data.tasks.length){
+      document.querySelectorAll(".f-task").forEach(function(el, idx){ if (data.tasks[idx]) el.value = data.tasks[idx]; });
+    }
+    if (data.skills && data.skills.length){
+      document.querySelectorAll(".f-skillname").forEach(function(el, idx){ if (data.skills[idx]) el.value = data.skills[idx].name; });
+      document.querySelectorAll(".f-skillwhy").forEach(function(el, idx){ if (data.skills[idx]) el.value = data.skills[idx].why; });
+    }
+    if (data.disc){
+      discActive = data.disc;
+      discChips.forEach(function(c){ c.setAttribute("data-active", c.getAttribute("data-type") === discActive ? "true" : "false"); });
+    }
+  }
+
+  document.querySelectorAll("input[type=text], textarea, select").forEach(function(el){
+    el.addEventListener("input", function(){ render(); save(); });
+  });
+
+  $("resetBtn").addEventListener("click", function(){
+    if (!confirm("입력한 내용을 모두 초기화할까요?")) return;
+    document.querySelectorAll("input[type=text], textarea").forEach(function(el){ el.value = ""; });
+    $("f-family").value = "";
+    discActive = "";
+    discChips.forEach(function(c){ c.setAttribute("data-active","false"); });
+    try{ localStorage.removeItem(STORAGE_KEY); }catch(e){}
+    render();
+  });
+
+  $("printBtn").addEventListener("click", function(){ window.print(); });
+
+  // mobile tabs
+  var paneForm = $("paneForm"), paneResult = $("paneResult");
+  $("tabFormBtn").addEventListener("click", function(){
+    paneForm.classList.add("active"); paneResult.classList.remove("active");
+    $("tabFormBtn").classList.add("primary"); $("tabFormBtn").classList.remove("ghost");
+    $("tabResultBtn").classList.add("ghost"); $("tabResultBtn").classList.remove("primary");
+  });
+  $("tabResultBtn").addEventListener("click", function(){
+    paneResult.classList.add("active"); paneForm.classList.remove("active");
+    $("tabResultBtn").classList.add("primary"); $("tabResultBtn").classList.remove("ghost");
+    $("tabFormBtn").classList.add("ghost"); $("tabFormBtn").classList.remove("primary");
+  });
+  paneResult.classList.add("active");
+
+  try{
+    var today = new Date();
+    $("bp-date").textContent = today.getFullYear()+"."+String(today.getMonth()+1).padStart(2,"0")+"."+String(today.getDate()).padStart(2,"0");
+  }catch(e){}
+
+  load();
+  render();
+})();
+</script>
+</body>
+</html>
